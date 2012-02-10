@@ -21,13 +21,14 @@ VENDORED_PYPY="https://bitbucket.org/pypy/pypy/downloads/pypy-1.8-linux64.tar.bz
 unset GIT_DIR
 export PIP_DOWNLOAD_CACHE
 
+cd $BUILD_DIR
+
 ##########
-pushd $ROOT_DIR
+echo "-----> Downloading pypy-1.8"
 mkdir pypy-1.8
-curl -LO $VENDORED_PYPY
+curl -sLO $VENDORED_PYPY
 tar -jxf $ROOT_DIR/pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
 rm -fr pypy-1.8-linux64.tar.bz2
-popd
 ##########
 
 indent() {
@@ -39,7 +40,6 @@ function virtualenv (){
   $PYPY_DIR/bin/pypy "$ROOT_DIR/src/virtualenv-1.7/virtualenv.py" "$@"
 }
 
-cd $BUILD_DIR
 
 # Reject a non-packaged Django app.
 if [ "$NAME" = "Python" ]; then
@@ -135,11 +135,11 @@ cp -RL $PYPY_DIR/include $BUILD_DIR/
 cp -RL $PYPY_DIR/lib_pypy $BUILD_DIR/
 cp -RL $PYPY_DIR/lib-python $BUILD_DIR/
 
-pushd $BUILD_DIR/bin
+pushd $BUILD_DIR/bin &> /dev/null
 rm -f python
 ln -s pypy python
-popd
-pushd $CACHE_DIR/bin
+popd &> /dev/null
+pushd $CACHE_DIR/bin &> /dev/null
 rm -f python
 ln -s pypy python
-popd
+popd &> /dev/null

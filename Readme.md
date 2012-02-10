@@ -1,4 +1,4 @@
-Heroku buildpack: Python
+Heroku buildpack: PyPy
 ========================
 
 This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) for Python apps.
@@ -12,17 +12,20 @@ Example usage:
     $ ls
     Procfile  requirements.txt  web.py
 
-    $ heroku create --stack cedar --buildpack git@github.com:heroku/heroku-buildpack-python.git
+    $ heroku create --stack cedar --buildpack git@github.com:mtigas/heroku-buildpack-pypy.git
 
     $ git push heroku master
     ...
     -----> Heroku receiving push
     -----> Fetching custom build pack... done
     -----> Python app detected
-    -----> Preparing virtualenv version 1.6.4
-           New python executable in ./bin/python
-           Installing setuptools............done.
+    -----> Downloading pypy-1.8
+    -----> Preparing virtualenv version 1.7
+           Already using interpreter /tmp/buildpack_3nkm61jrytp4x/pypy-1.8/bin/pypy
+           New pypy executable in ./bin/pypy
+           Installing distribute............done.
            Installing pip...............done.
+    -----> Activating virtualenv
     -----> Installing dependencies using pip version 1.0.2
            Downloading/unpacking Flask==0.7.2 (from -r requirements.txt (line 1))
            Downloading/unpacking Werkzeug>=0.6.1 (from Flask==0.7.2->-r requirements.txt (line 1))
