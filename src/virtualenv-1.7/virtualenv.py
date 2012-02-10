@@ -1490,9 +1490,10 @@ OK_ABS_SCRIPTS = ['python', 'python%s' % sys.version[:3],
 
 def fixup_scripts(home_dir):
     # This is what we expect at the top of scripts:
-    shebang = '#!%s/bin/python' % os.path.normcase(os.path.abspath(home_dir))
+    shebang_py = '#!%s/bin/python' % os.path.normcase(os.path.abspath(home_dir))
+    shebang_pypy = '#!%s/bin/pypy' % os.path.normcase(os.path.abspath(home_dir))
     # This is what we'll put:
-    new_shebang = '#!/usr/bin/env python%s' % sys.version[:3]
+    new_shebang = '#!/usr/bin/env pypy'
     activate = "import os; activate_this=os.path.join(os.path.dirname(__file__), 'activate_this.py'); execfile(activate_this, dict(__file__=activate_this)); del os, activate_this"
     if sys.platform == 'win32':
         bin_suffix = 'Scripts'
@@ -1511,14 +1512,14 @@ def fixup_scripts(home_dir):
         if not lines:
             logger.warn('Script %s is an empty file' % filename)
             continue
-        if not lines[0].strip().startswith(shebang):
+        if not lines[0].strip().startswith((shebang_py, shebang_pypy)):
             if os.path.basename(filename) in OK_ABS_SCRIPTS:
                 logger.debug('Cannot make script %s relative' % filename)
             elif lines[0].strip() == new_shebang:
                 logger.info('Script %s has already been made relative' % filename)
             else:
-                logger.warn('Script %s cannot be made relative (it\'s not a normal script that starts with %s)'
-                            % (filename, shebang))
+                logger.warn('Script %s cannot be made relative (it\'s not a normal script that starts with %s or %s)'
+                            % (filename, shebang_py, shebang_pypy))
             continue
         logger.notify('Making script %s relative' % filename)
         lines = [new_shebang+'\n', activate+'\n'] + lines[1:]

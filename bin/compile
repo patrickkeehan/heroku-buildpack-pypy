@@ -10,14 +10,25 @@ BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 ROOT_DIR=$(dirname $BIN_DIR)
 BUILD_DIR=$1
 CACHE_DIR=$2
+PYPY_DIR=$ROOT_DIR/pypy-1.8
 
 NAME=$($BIN_DIR/detect $BUILD_DIR)
 PIP_DOWNLOAD_CACHE=${PIP_DOWNLOAD_CACHE:-$CACHE_DIR/pip_downloads}
-VIRTUALENV_DIRS="bin include lib"
+VIRTUALENV_DIRS="bin include lib-python lib_pypy site-packages"
 VENDORED_MEMCACHED="http://cl.ly/0a191R3K160t1w1P0N25/vendor-libmemcached.tar.gz"
+VENDORED_PYPY="https://bitbucket.org/pypy/pypy/downloads/pypy-1.8-linux64.tar.bz2"
 
 unset GIT_DIR
 export PIP_DOWNLOAD_CACHE
+
+##########
+pushd $ROOT_DIR
+mkdir pypy-1.8
+curl -LO $VENDORED_PYPY
+tar -jxf $ROOT_DIR/pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
+rm -fr pypy-1.8-linux64.tar.bz2
+popd
+##########
 
 indent() {
   RE="s/^/       /"
@@ -25,7 +36,7 @@ indent() {
 }
 
 function virtualenv (){
-  python "$ROOT_DIR/src/virtualenv-1.7/virtualenv.py" "$@"
+  $PYPY_DIR/bin/pypy "$ROOT_DIR/src/virtualenv-1.7/virtualenv.py" "$@"
 }
 
 cd $BUILD_DIR
@@ -57,7 +68,7 @@ set +e
 echo "-----> Preparing virtualenv version $(virtualenv --version)"
 
 # Try to create the virtualenv.
-OUT=$(virtualenv --distribute --never-download  --prompt=venv . 2>&1)
+OUT=$(virtualenv --distribute --never-download -p $PYPY_DIR/bin/pypy --prompt=venv . 2>&1)
 
 # If there's an error, purge and recreate.
 [ $? -ne 0 ] && {
@@ -65,7 +76,7 @@ OUT=$(virtualenv --distribute --never-download  --prompt=venv . 2>&1)
   for dir in $VIRTUALENV_DIRS; do
     rm -fr $dir &> /dev/null || true
   done
-  OUT=$(virtualenv --distribute --never-download  --prompt=venv . )
+  OUT=$(virtualenv --distribute --never-download -p $PYPY_DIR/bin/pypy  --prompt=venv . )
 }
 echo "$OUT" | indent
 
@@ -110,3 +121,25 @@ for dir in $VIRTUALENV_DIRS; do
   rm -rf $CACHE_DIR/$dir
   cp -R $dir $CACHE_DIR/
 done
+
+# Fixes to CACHE_DIR and BUILD_DIR
+# virtualenv makes symlinks to include and files within lib_pypy and lib-python
+# and we don't want that behavior
+rm -fr $CACHE_DIR/include $CACHE_DIR/lib_pypy $CACHE_DIR/lib-python
+cp -RL $PYPY_DIR/include $CACHE_DIR/
+cp -RL $PYPY_DIR/lib_pypy $CACHE_DIR/
+cp -RL $PYPY_DIR/lib-python $CACHE_DIR/
+
+rm -fr $BUILD_DIR/include $BUILD_DIR/lib_pypy $BUILD_DIR/lib-python
+cp -RL $PYPY_DIR/include $BUILD_DIR/
+cp -RL $PYPY_DIR/lib_pypy $BUILD_DIR/
+cp -RL $PYPY_DIR/lib-python $BUILD_DIR/
+
+pushd $BUILD_DIR/bin
+rm -f python
+ln -s pypy python
+popd
+pushd $CACHE_DIR/bin
+rm -f python
+ln -s pypy python
+popd
