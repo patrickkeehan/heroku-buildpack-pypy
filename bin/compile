@@ -139,6 +139,7 @@ popd &> /dev/null
 # remove "tests" dir from pypy sources
 rm -fr $BUILD_DIR/lib-python/2.7/test/
 rm -fr $BUILD_DIR/lib-python/modified-2.7/test/
+rm -fr $BUILD_DIR/lib_pypy/pypy_test/
 
 # Store site-packages in cache.
 rm -rf $CACHE_DIR/site-packages
@@ -150,6 +151,8 @@ rm -fr $CACHE_DIR/bin
 rm -fr $CACHE_DIR/include
 rm -fr $CACHE_DIR/lib-python
 rm -fr $CACHE_DIR/lib_pypy
+
+ls -lah $CACHE_DIR
 
 # Compile .pyc files in $BUILD_DIR
 echo "-----> Compiling .pyc files"
