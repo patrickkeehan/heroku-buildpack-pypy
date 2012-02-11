@@ -22,8 +22,6 @@ export PIP_DOWNLOAD_CACHE
 
 mkdir -p $CACHE_DIR
 
-ls -lah $CACHE_DIR/*
-
 ##########
 # Install pypy-1.8 in CACHE_DIR. Always rebuild it in case something has
 # effed up the CACHE_DIR/pypy-1.8 dir, but keep the tarball around so we don't
@@ -154,8 +152,6 @@ rm -fr $CACHE_DIR/bin
 rm -fr $CACHE_DIR/include
 rm -fr $CACHE_DIR/lib-python
 rm -fr $CACHE_DIR/lib_pypy
-
-ls -lah $CACHE_DIR/*
 
 # Compile .pyc files in $BUILD_DIR
 echo "-----> Compiling .pyc files"
