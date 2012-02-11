@@ -10,7 +10,7 @@ BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 ROOT_DIR=$(dirname $BIN_DIR)
 BUILD_DIR=$1
 CACHE_DIR=$2
-PYPY_DIR=$ROOT_DIR/pypy-1.8
+PYPY_DIR=$CACHE_DIR/pypy-1.8
 
 NAME=$($BIN_DIR/detect $BUILD_DIR)
 PIP_DOWNLOAD_CACHE=${PIP_DOWNLOAD_CACHE:-$CACHE_DIR/pip_downloads}
@@ -21,14 +21,26 @@ VENDORED_PYPY="https://bitbucket.org/pypy/pypy/downloads/pypy-1.8-linux64.tar.bz
 unset GIT_DIR
 export PIP_DOWNLOAD_CACHE
 
+mkdir -p $CACHE_DIR
+
 ##########
-cd $ROOT_DIR
-echo "-----> Downloading pypy-1.8"
+# Install pypy-1.8 in CACHE_DIR. Always rebuild it in case something has
+# effed up the CACHE_DIR/pypy-1.8 dir, but keep the tarball around so we don't
+# have to re-download.
+if [ ! -f $CACHE_DIR/pypy-1.8-linux64.tar.bz2 ];
+then
+    cd $CACHE_DIR
+    echo "-----> Downloading pypy-1.8"
+    curl -sLO $VENDORED_PYPY
+else
+    echo "-----> pypy-1.8 in cache"
+fi
+cd $CACHE_DIR
+rm -fr pypy-1.8
 mkdir pypy-1.8
-curl -sLO $VENDORED_PYPY
-tar -jxf pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
-rm -fr pypy-1.8-linux64.tar.bz2
+tar -jxf $CACHE_DIR/pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
 ##########
+
 cd $BUILD_DIR
 
 indent() {
@@ -39,7 +51,6 @@ indent() {
 function virtualenv (){
   $PYPY_DIR/bin/pypy "$ROOT_DIR/src/virtualenv-1.7/virtualenv.py" "$@"
 }
-
 
 # Reject a non-packaged Django app.
 if [ "$NAME" = "Python" ]; then
@@ -58,7 +69,6 @@ if [ -f "lib/python2.7" ]; then
 fi
 
 # Copy artifacts out of cache if exists.
-mkdir -p $CACHE_DIR
 for dir in $VIRTUALENV_DIRS; do
   cp -R $CACHE_DIR/$dir . &> /dev/null || true
 done
@@ -116,34 +126,30 @@ OUT=$(virtualenv --relocatable .)
 }
 set -e
 
+##### pypy fixes to BUILD_DIR #####
+# virtualenv makes symlinks to include and files within lib_pypy and lib-python
+# and we don't want that behavior
+rm -fr $BUILD_DIR/include $BUILD_DIR/lib_pypy $BUILD_DIR/lib-python
+cp -RL $PYPY_DIR/include $BUILD_DIR/
+cp -RL $PYPY_DIR/lib_pypy $BUILD_DIR/
+cp -RL $PYPY_DIR/lib-python $BUILD_DIR/
+pushd $BUILD_DIR/bin &> /dev/null
+rm -f python
+ln -s pypy python
+popd &> /dev/null
+# /pypy fixes #####
+
 # Store new artifacts in cache.
 for dir in $VIRTUALENV_DIRS; do
   rm -rf $CACHE_DIR/$dir
   cp -R $dir $CACHE_DIR/
 done
 
-# Fixes to CACHE_DIR and BUILD_DIR
-# virtualenv makes symlinks to include and files within lib_pypy and lib-python
-# and we don't want that behavior
-rm -fr $CACHE_DIR/include $CACHE_DIR/lib_pypy $CACHE_DIR/lib-python
-cp -RL $PYPY_DIR/include $CACHE_DIR/
-cp -RL $PYPY_DIR/lib_pypy $CACHE_DIR/
-cp -RL $PYPY_DIR/lib-python $CACHE_DIR/
+# Clean up pypy source dir in $CACHE_DIR. We'll keep the source tarball around
+rm -fr $CACHE_DIR/pypy-1.8
 
-rm -fr $BUILD_DIR/include $BUILD_DIR/lib_pypy $BUILD_DIR/lib-python
-cp -RL $PYPY_DIR/include $BUILD_DIR/
-cp -RL $PYPY_DIR/lib_pypy $BUILD_DIR/
-cp -RL $PYPY_DIR/lib-python $BUILD_DIR/
+ls -lah $CACHE_DIR/*
 
-pushd $BUILD_DIR/bin &> /dev/null
-rm -f python
-ln -s pypy python
-popd &> /dev/null
-pushd $CACHE_DIR/bin &> /dev/null
-rm -f python
-ln -s pypy python
-popd &> /dev/null
+# Compile .pyc files in $BUILD_DIR
 echo "-----> Compiling .pyc files"
 pypy -m compileall -fq $BUILD_DIR
-pypy -m compileall -fq $CACHE_DIR
-pypy -m compileall -fq .
