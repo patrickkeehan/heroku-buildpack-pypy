@@ -21,15 +21,15 @@ VENDORED_PYPY="https://bitbucket.org/pypy/pypy/downloads/pypy-1.8-linux64.tar.bz
 unset GIT_DIR
 export PIP_DOWNLOAD_CACHE
 
-cd $BUILD_DIR
-
 ##########
+cd $ROOT_DIR
 echo "-----> Downloading pypy-1.8"
 mkdir pypy-1.8
 curl -sLO $VENDORED_PYPY
 tar -jxf pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
 rm -fr pypy-1.8-linux64.tar.bz2
 ##########
+cd $BUILD_DIR
 
 indent() {
   RE="s/^/       /"
