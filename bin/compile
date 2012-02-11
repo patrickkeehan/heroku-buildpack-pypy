@@ -14,7 +14,6 @@ PYPY_DIR=$CACHE_DIR/pypy-1.8
 
 NAME=$($BIN_DIR/detect $BUILD_DIR)
 PIP_DOWNLOAD_CACHE=${PIP_DOWNLOAD_CACHE:-$CACHE_DIR/pip_downloads}
-VIRTUALENV_DIRS="bin include lib-python lib_pypy site-packages"
 VENDORED_MEMCACHED="http://cl.ly/0a191R3K160t1w1P0N25/vendor-libmemcached.tar.gz"
 VENDORED_PYPY="https://bitbucket.org/pypy/pypy/downloads/pypy-1.8-linux64.tar.bz2"
 
@@ -68,10 +67,8 @@ if [ -f "lib/python2.7" ]; then
   exit 1;
 fi
 
-# Copy artifacts out of cache if exists.
-for dir in $VIRTUALENV_DIRS; do
-  cp -R $CACHE_DIR/$dir . &> /dev/null || true
-done
+# Copy site-packages out of cache if exists.
+cp -R $CACHE_DIR/site-packages . &> /dev/null || true
 
 # Create virtualenv. Rebuild if corrupt.
 set +e
@@ -139,16 +136,20 @@ ln -s pypy python
 popd &> /dev/null
 # /pypy fixes #####
 
-# Store new artifacts in cache.
-for dir in $VIRTUALENV_DIRS; do
-  rm -rf $CACHE_DIR/$dir
-  cp -R $dir $CACHE_DIR/
-done
+# remove "tests" dir from pypy sources
+rm -fr $BUILD_DIR/lib-python/2.7/test/
+rm -fr $BUILD_DIR/lib-python/modified-2.7/test/
+
+# Store site-packages in cache.
+rm -rf $CACHE_DIR/site-packages
+cp -R site-packages $CACHE_DIR/
 
 # Clean up pypy source dir in $CACHE_DIR. We'll keep the source tarball around
 rm -fr $CACHE_DIR/pypy-1.8
-
-ls -lah $CACHE_DIR/*
+rm -fr $CACHE_DIR/bin
+rm -fr $CACHE_DIR/include
+rm -fr $CACHE_DIR/lib-python
+rm -fr $CACHE_DIR/lib_pypy
 
 # Compile .pyc files in $BUILD_DIR
 echo "-----> Compiling .pyc files"
