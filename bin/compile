@@ -66,24 +66,12 @@ if [ -f "lib/python2.7" ]; then
   exit 1;
 fi
 
-# Copy site-packages out of cache if exists.
-cp -R $CACHE_DIR/site-packages . &> /dev/null || true
-
 # Create virtualenv. Rebuild if corrupt.
 set +e
 echo "-----> Preparing virtualenv version $(virtualenv --version)"
 
 # Try to create the virtualenv.
 OUT=$(virtualenv --distribute --never-download -p $PYPY_DIR/bin/pypy --prompt=venv . 2>&1)
-
-# If there's an error, purge and recreate.
-[ $? -ne 0 ] && {
-  echo " !     Virtualenv corrupt, rebuilding."
-  for dir in $VIRTUALENV_DIRS; do
-    rm -fr $dir &> /dev/null || true
-  done
-  OUT=$(virtualenv --distribute --never-download -p $PYPY_DIR/bin/pypy  --prompt=venv . )
-}
 echo "$OUT" | indent
 
 set -e
@@ -142,16 +130,13 @@ rm -fr $BUILD_DIR/lib-python/modified-2.7/test/
 rm -fr $BUILD_DIR/lib-python/modified-2.7/lib2to3/tests/
 rm -fr $BUILD_DIR/lib_pypy/pypy_test/
 
-# Store site-packages in cache.
-rm -rf $CACHE_DIR/site-packages
-cp -R site-packages $CACHE_DIR/
-
-# Clean up pypy source dir in $CACHE_DIR. We'll keep the source tarball around
+# Clean up pypy source dir in $CACHE_DIR.
 rm -fr $CACHE_DIR/pypy-1.8
 rm -fr $CACHE_DIR/bin
 rm -fr $CACHE_DIR/include
 rm -fr $CACHE_DIR/lib-python
 rm -fr $CACHE_DIR/lib_pypy
+rm -fr $CACHE_DIR/site-packages
 
 # Compile .pyc files in $BUILD_DIR
 echo "-----> Compiling .pyc files"
