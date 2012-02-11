@@ -144,6 +144,6 @@ rm -f python
 ln -s pypy python
 popd &> /dev/null
 echo "-----> Compiling .pyc files"
-$PYPY_DIR/bin/pypy -c "import compileall;compileall.compile_dir('$BUILD_DIR', force=1)"
-$PYPY_DIR/bin/pypy -c "import compileall;compileall.compile_dir('$CACHE_DIR', force=1)"
-$PYPY_DIR/bin/pypy -c "import compileall;compileall.compile_dir('.', force=1)"
+pypy -m compileall -fq $BUILD_DIR
+pypy -m compileall -fq $CACHE_DIR
+pypy -m compileall -fq .
