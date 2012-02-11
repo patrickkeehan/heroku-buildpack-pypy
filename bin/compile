@@ -27,7 +27,7 @@ cd $BUILD_DIR
 echo "-----> Downloading pypy-1.8"
 mkdir pypy-1.8
 curl -sLO $VENDORED_PYPY
-tar -jxf $ROOT_DIR/pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
+tar -jxf pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
 rm -fr pypy-1.8-linux64.tar.bz2
 ##########
 
