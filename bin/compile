@@ -26,8 +26,7 @@ mkdir -p $CACHE_DIR
 # Install pypy-1.8 in CACHE_DIR. Always rebuild it in case something has
 # effed up the CACHE_DIR/pypy-1.8 dir, but keep the tarball around so we don't
 # have to re-download.
-if [ ! -f $CACHE_DIR/pypy-1.8-linux64.tar.bz2 ];
-then
+if [ ! -f "$CACHE_DIR/pypy-1.8-linux64.tar.bz2" ]; then
     cd $CACHE_DIR
     echo "-----> Downloading pypy-1.8"
     curl -sLO $VENDORED_PYPY
@@ -138,7 +137,9 @@ popd &> /dev/null
 
 # remove "tests" dir from pypy sources
 rm -fr $BUILD_DIR/lib-python/2.7/test/
+rm -fr $BUILD_DIR/lib-python/2.7/lib2to3/tests/
 rm -fr $BUILD_DIR/lib-python/modified-2.7/test/
+rm -fr $BUILD_DIR/lib-python/modified-2.7/lib2to3/tests/
 rm -fr $BUILD_DIR/lib_pypy/pypy_test/
 
 # Store site-packages in cache.
@@ -157,3 +158,5 @@ ls -lah $CACHE_DIR
 # Compile .pyc files in $BUILD_DIR
 echo "-----> Compiling .pyc files"
 pypy -m compileall -fq $BUILD_DIR
+
+exit 0
