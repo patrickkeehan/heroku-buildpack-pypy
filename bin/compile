@@ -21,6 +21,7 @@ unset GIT_DIR
 export PIP_DOWNLOAD_CACHE
 
 mkdir -p $CACHE_DIR
+mkdir -p $PIP_DOWNLOAD_CACHE
 
 ##########
 # Install pypy-1.8 in CACHE_DIR. Always rebuild it in case something has
@@ -137,9 +138,12 @@ rm -fr $CACHE_DIR/include
 rm -fr $CACHE_DIR/lib-python
 rm -fr $CACHE_DIR/lib_pypy
 rm -fr $CACHE_DIR/site-packages
+find $CACHE_DIR -name "*.pyc" -delete
 
 # Compile .pyc files in $BUILD_DIR
-echo "-----> Compiling .pyc files"
-pypy -m compileall -fq $BUILD_DIR
+#echo "-----> Compiling .pyc files"
+#pypy -m compileall -fq $BUILD_DIR
+
+find $BUILD_DIR -name "*.pyc" -delete
 
 exit 0
