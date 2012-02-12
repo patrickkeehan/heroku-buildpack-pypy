@@ -141,9 +141,7 @@ rm -fr $CACHE_DIR/site-packages
 find $CACHE_DIR -name "*.pyc" -delete
 
 # Compile .pyc files in $BUILD_DIR
-#echo "-----> Compiling .pyc files"
-#pypy -m compileall -fq $BUILD_DIR
-
-find $BUILD_DIR -name "*.pyc" -delete
+echo "-----> Compiling .pyc files"
+pypy -m compileall -fq $BUILD_DIR
 
 exit 0
