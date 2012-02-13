@@ -7,7 +7,20 @@ It uses [virtualenv](http://www.virtualenv.org/) and [pip](http://www.pip-instal
 Usage
 -----
 
-Example usage:
+To create a new Heroku Cedar application with this buildpack:
+
+    $ heroku create --stack cedar --buildpack git://github.com/mtigas/heroku-buildpack-pypy.git
+
+To update an existing Heroku Cedar application to use this buildpack:
+
+    $ heroku config:add BUILDPACK_URL=git://github.com/mtigas/heroku-buildpack-pypy.git
+
+and then re-deploy your application.
+
+----
+
+
+Example:
 
     $ ls
     Procfile  requirements.txt  web.py
