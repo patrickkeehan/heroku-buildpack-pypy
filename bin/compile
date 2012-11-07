@@ -87,6 +87,8 @@ source $BIN_DIR/steps/pylibmc
 echo "-----> Activating virtualenv"
 source bin/activate
 
+pip install --upgrade distribute
+
 # Install mercurial, if needed.
 if (grep -Fiq "hg+" requirements.txt) then
   pip install --use-mirrors mercurial | indent
