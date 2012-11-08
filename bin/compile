@@ -11,17 +11,31 @@ ROOT_DIR=$(dirname $BIN_DIR)
 BUILD_DIR=$1
 CACHE_DIR=$2
 PYPY_DIR=$CACHE_DIR/pypy-1.8
+NGINX_VERSION=1.3.3
 
 NAME=$($BIN_DIR/detect $BUILD_DIR)
 PIP_DOWNLOAD_CACHE=${PIP_DOWNLOAD_CACHE:-$CACHE_DIR/pip_downloads}
 VENDORED_MEMCACHED="http://cl.ly/0a191R3K160t1w1P0N25/vendor-libmemcached.tar.gz"
 VENDORED_PYPY="https://bitbucket.org/pypy/pypy/downloads/pypy-1.8-linux64.tar.bz2"
+NGINX_URL="http://travisj.herokuapp.com/output/4e802be1-b7b3-4a38-9ebe-6e0516aa31c5"
 
 unset GIT_DIR
 export PIP_DOWNLOAD_CACHE
 
 mkdir -p $CACHE_DIR
 mkdir -p $PIP_DOWNLOAD_CACHE
+
+
+####################
+# Install Nginx
+####################
+echo "-----> Installing Nginx"
+cd ${BUILD_DIR}
+if [ ! -d ./vendor/nginx ]; then
+	echo "-----> Bundling Nginx v${NGINX_VERSION}"
+	mkdir -p ./vendor/nginx && cd ./vendor/nginx
+	curl --silent --max-time 60 --location $NGINX_URL | tar xz
+fi
 
 ##########
 # Install pypy-1.8 in CACHE_DIR. Always rebuild it in case something has
@@ -146,5 +160,24 @@ find $BUILD_DIR -name "*.pyc" -delete
 # Compile .pyc files in $BUILD_DIR
 #echo "-----> Compiling .pyc files"
 #pypy -m compileall -fq $BUILD_DIR
+
+
+echo "-----> Installing boot script"
+cd $BUILD_DIR
+cat >>boot.sh <<EOF
+#!/usr/bin/env bash
+
+echo "Booting nginx"
+
+erb /app/_config/nginx.conf.erb > /app/vendor/nginx/conf/nginx.conf
+
+touch /app/vendor/nginx/logs/access.log /app/vendor/nginx/logs/error.log
+(tail -f -n 0 /app/vendor/nginx/logs/*.log &)
+
+/app/vendor/nginx/sbin/nginx -c /app/vendor/nginx/conf/nginx.conf
+EOF
+chmod +x boot.sh
+
+echo "-----> Done with compile"
 
 exit 0
