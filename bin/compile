@@ -175,6 +175,8 @@ touch /app/vendor/nginx/logs/access.log /app/vendor/nginx/logs/error.log
 (tail -f -n 0 /app/vendor/nginx/logs/*.log &)
 
 /app/vendor/nginx/sbin/nginx -c /app/vendor/nginx/conf/nginx.conf
+
+newrelic-admin run-program gunicorn wsgi -b 127.0.0.1:8000 -w 4 &
 EOF
 chmod +x boot.sh
 
