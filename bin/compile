@@ -169,7 +169,7 @@ cat >>boot.sh <<EOF
 
 echo "Booting nginx"
 
-erb /app/nginx.conf.erb > /app/vendor/nginx/conf/nginx.conf
+erb /app/conf/nginx.conf.erb > /app/vendor/nginx/conf/nginx.conf
 
 touch /app/vendor/nginx/logs/access.log /app/vendor/nginx/logs/error.log
 (tail -f -n 0 /app/vendor/nginx/logs/*.log &)
