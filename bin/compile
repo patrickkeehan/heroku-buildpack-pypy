@@ -161,9 +161,6 @@ find $BUILD_DIR -name "*.pyc" -delete
 #echo "-----> Compiling .pyc files"
 #pypy -m compileall -fq $BUILD_DIR
 
-echo "-----> Creating nginx conf"
-erb /app/conf/nginx.conf.erb > /app/vendor/nginx/conf/nginx.conf
-
 cd $BUILD_DIR
 chmod +x boot.sh
 
