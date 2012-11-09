@@ -27,20 +27,16 @@ mkdir -p $PIP_DOWNLOAD_CACHE
 
 
 ####################
-# Install Nginx
+# Get the various files we need
 ####################
-echo "-----> Installing Nginx"
-cd ${BUILD_DIR}
-if [ ! -d ./vendor/nginx ]; then
-	echo "-----> Bundling Nginx v${NGINX_VERSION}"
-	mkdir -p ./vendor/nginx && cd ./vendor/nginx
-	curl --silent --max-time 60 --location $NGINX_URL | tar xz
+if [ ! -f "$CACHE_DIR/4e802be1-b7b3-4a38-9ebe-6e0516aa31c5" ]; then
+	cd $CACHE_DIR
+	echo "Fetching nginx..."
+	curl -sLO $NGINX_URL
+else
+    echo "-----> nginx in cache"
 fi
 
-##########
-# Install pypy-1.8 in CACHE_DIR. Always rebuild it in case something has
-# effed up the CACHE_DIR/pypy-1.8 dir, but keep the tarball around so we don't
-# have to re-download.
 if [ ! -f "$CACHE_DIR/pypy-1.8-linux64.tar.bz2" ]; then
     cd $CACHE_DIR
     echo "-----> Downloading pypy-1.8"
@@ -48,11 +44,24 @@ if [ ! -f "$CACHE_DIR/pypy-1.8-linux64.tar.bz2" ]; then
 else
     echo "-----> pypy-1.8 in cache"
 fi
+
+
+####################
+# Install Nginx
+####################
 cd $CACHE_DIR
+echo "-----> Installing Nginx"
+mkdir -p ${BUILD_DIR}/vendor/nginx
+tar -xzf $CACHE_DIR/4e802be1-b7b3-4a38-9ebe-6e0516aa31c5 -C ${BUILD_DIR}/vendor/nginx
+
+####################
+# Install pypy-1.8
+####################
 rm -fr pypy-1.8
 mkdir pypy-1.8
 tar -jxf $CACHE_DIR/pypy-1.8-linux64.tar.bz2 -C $PYPY_DIR --strip-components 1
-##########
+
+
 
 cd $BUILD_DIR
 
