@@ -171,7 +171,7 @@ find $BUILD_DIR -name "*.pyc" -delete
 #pypy -m compileall -fq $BUILD_DIR
 
 cd $BUILD_DIR
-chmod +x boot.sh
+chmod +x etc/boot.sh
 
 echo "-----> Done with compile"
 exit 0
