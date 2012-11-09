@@ -31,7 +31,7 @@ mkdir -p $PIP_DOWNLOAD_CACHE
 ####################
 if [ ! -f "$CACHE_DIR/4e802be1-b7b3-4a38-9ebe-6e0516aa31c5" ]; then
 	cd $CACHE_DIR
-	echo "Fetching nginx..."
+	echo "-----> Fetching nginx"
 	curl -sLO $NGINX_URL
 else
     echo "-----> nginx in cache"
